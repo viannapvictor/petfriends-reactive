@@ -1,0 +1,57 @@
+package com.petfriends.almoxarifado.readmodel;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDateTime;
+
+/**
+ * Read Model para Reserva de Estoque
+ * Otimizado para consultas (CQRS - Query Side)
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("reserva_estoque_view")
+public class ReservaEstoqueView implements Persistable<String> {
+    
+    @Id
+    private String id;
+    
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+    
+    @Column("pedido_id")
+    private String pedidoId;
+    
+    @Column("status")
+    private String status;
+    
+    @Column("operador_id")
+    private String operadorId;
+    
+    @Column("created_at")
+    private LocalDateTime createdAt;
+    
+    @Column("updated_at")
+    private LocalDateTime updatedAt;
+    
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+    
+    public void markAsExisting() {
+        this.isNew = false;
+    }
+}
+

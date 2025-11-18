@@ -1,0 +1,110 @@
+spring:
+  application:
+    name: petfriends-almoxarifado
+  
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/almoxarifado_db
+    username: postgres
+    password: postgres
+    pool:
+      initial-size: 10
+      max-size: 20
+      max-idle-time: 30m
+  
+  flyway:
+    url: jdbc:postgresql://localhost:5432/almoxarifado_db
+    user: postgres
+    password: postgres
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  
+  cloud:
+    function:
+      definition: almoxarifadoEventsIn
+    stream:
+      kafka:
+        binder:
+          brokers: kafka:9092
+          auto-create-topics: true
+      bindings:
+        output-events:
+          destination: almoxarifado-events
+          content-type: application/json
+        almoxarifadoEventsIn-in-0:
+          destination: almoxarifado-events
+          content-type: application/json
+          group: almoxarifado-projection-group
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9093
+  
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+    time-zone: America/Sao_Paulo
+
+server:
+  port: 8082
+
+logging:
+  level:
+    root: INFO
+    com.petfriends.almoxarifado: DEBUG
+    org.springframework.r2dbc: DEBUG
+    org.springframework.data.r2dbc: DEBUG
+    org.springframework.cloud.stream: DEBUG
+    io.r2dbc.postgresql.QUERY: DEBUG
+    io.r2dbc.postgresql.PARAM: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,beans,prometheus
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+info:
+  app:
+    name: PetFriends Almoxarifado
+    description: Microsserviço de Gestão de Estoque e Reservas - Reativo
+    version: 1.0.0-SNAPSHOT
+    bounded-context: Almoxarifado
+    architecture: DDD + CQRS + Event Sourcing + Reactive + Kafka
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+  show-actuator: true
+  packages-to-scan: com.petfriends.almoxarifado.controllers
+
