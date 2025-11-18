@@ -8,9 +8,6 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface ReservaEstoqueViewRepository extends ReactiveCrudRepository<ReservaEstoqueView, String> {
     
-    /**
-     * Busca reserva por pedidoId
-     */
     @Query("SELECT * FROM reserva_estoque_view WHERE pedido_id = :pedidoId")
     Mono<ReservaEstoqueView> findByPedidoId(String pedidoId);
 }

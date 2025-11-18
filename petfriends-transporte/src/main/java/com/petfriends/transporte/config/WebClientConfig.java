@@ -5,9 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
-/**
- * Configuração do WebClient para comunicação reativa entre microsserviços
- */
 @Configuration
 public class WebClientConfig {
 

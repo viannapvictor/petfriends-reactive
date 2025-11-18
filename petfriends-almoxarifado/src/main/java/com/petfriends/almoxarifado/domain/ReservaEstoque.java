@@ -8,11 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Agregado ReservaEstoque - DDD Aggregate Root
- * Gerencia o ciclo de vida de reservas de estoque
- * Arquitetura: Pure POJO (sem Axon/JPA) + Event Sourcing
- */
 @Data
 public class ReservaEstoque {
 
@@ -31,10 +26,6 @@ public class ReservaEstoque {
         this.itens = new ArrayList<>();
     }
 
-    /**
-     * Command: Reservar Estoque
-     * Retorna o evento a ser persistido
-     */
     public BaseEvent<?> reservarEstoque(ReservarEstoqueCommand comando) {
         if (comando.itens == null || comando.itens.isEmpty()) {
             throw new IllegalArgumentException("Não é possível reservar estoque sem itens");
@@ -62,9 +53,6 @@ public class ReservaEstoque {
         }
     }
 
-    /**
-     * Command: Confirmar Reserva
-     */
     public BaseEvent<?> confirmarReserva(ConfirmarReservaCommand comando) {
         if (StatusReserva.INSUFICIENTE.toString().equals(this.status)) {
             throw new IllegalStateException("Não é possível confirmar reserva com estoque insuficiente");
@@ -73,9 +61,6 @@ public class ReservaEstoque {
         return new ReservaConfirmada(comando.id, this.pedidoId);
     }
 
-    /**
-     * Command: Cancelar Reserva
-     */
     public BaseEvent<?> cancelarReserva(CancelarReservaCommand comando) {
         if (StatusReserva.SEPARADA.toString().equals(this.status)) {
             throw new IllegalStateException("Não é possível cancelar reserva já separada");
@@ -84,9 +69,6 @@ public class ReservaEstoque {
         return new ReservaCancelada(comando.id, this.pedidoId, comando.motivo);
     }
 
-    /**
-     * Command: Separar Itens
-     */
     public BaseEvent<?> separarItens(SepararItensCommand comando) {
         if (!StatusReserva.CONFIRMADA.toString().equals(this.status)) {
             throw new IllegalStateException("Só é possível separar itens de reservas confirmadas");
@@ -95,9 +77,6 @@ public class ReservaEstoque {
         return new ItensSeparados(comando.id, this.pedidoId, comando.operadorId);
     }
 
-    /**
-     * Aplica evento ao agregado (Event Sourcing)
-     */
     public void apply(BaseEvent<?> evento) {
         if (evento instanceof EstoqueReservado) {
             on((EstoqueReservado) evento);
@@ -112,7 +91,6 @@ public class ReservaEstoque {
         }
     }
 
-    // Event Handlers (reconstroem o estado)
     protected void on(EstoqueReservado evento) {
         this.id = evento.id;
         this.pedidoId = evento.pedidoId;
@@ -145,9 +123,6 @@ public class ReservaEstoque {
         return itens.stream().allMatch(item -> item.quantidade > 0);
     }
 
-    /**
-     * Value Object: Item da Reserva
-     */
     @Data
     public static class ItemReserva {
         private String produtoId;

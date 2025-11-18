@@ -37,7 +37,7 @@ public class EventStoreEntry implements Persistable<UUID> {
     private String eventType;
     
     @Column("event_data")
-    private String eventData;  // JSON serialized event
+    private String eventData;
     
     @Column("version")
     private Long version;
@@ -46,7 +46,7 @@ public class EventStoreEntry implements Persistable<UUID> {
     private LocalDateTime timestamp;
     
     @Column("metadata")
-    private String metadata;  // Optional metadata as JSON
+    private String metadata;
     
     @Override
     public boolean isNew() {

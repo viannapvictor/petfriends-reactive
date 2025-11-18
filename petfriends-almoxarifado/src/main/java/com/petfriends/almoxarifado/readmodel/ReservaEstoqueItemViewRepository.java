@@ -11,15 +11,9 @@ import java.util.UUID;
 @Repository
 public interface ReservaEstoqueItemViewRepository extends ReactiveCrudRepository<ReservaEstoqueItemView, UUID> {
     
-    /**
-     * Busca itens de uma reserva
-     */
     @Query("SELECT * FROM reserva_estoque_item_view WHERE reserva_id = :reservaId")
     Flux<ReservaEstoqueItemView> findByReservaId(String reservaId);
     
-    /**
-     * Deleta todos os itens de uma reserva
-     */
     @Query("DELETE FROM reserva_estoque_item_view WHERE reserva_id = :reservaId")
     Mono<Void> deleteByReservaId(String reservaId);
 }

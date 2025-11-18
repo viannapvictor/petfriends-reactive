@@ -13,10 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Service de Comandos - CQRS Command Side
- * Arquitetura Reativa com Event Sourcing
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,14 +31,11 @@ public class ReservaEstoqueCommandServiceImpl implements ReservaEstoqueCommandSe
 
         ReservarEstoqueCommand comando = new ReservarEstoqueCommand(reservaId, pedidoId, itensDTO);
         
-        // Criar novo agregado e executar comando
         ReservaEstoque agregado = new ReservaEstoque(reservaId);
         BaseEvent<?> evento = agregado.reservarEstoque(comando);
         
-        // Aplicar evento ao agregado (atualizar estado)
         agregado.apply(evento);
 
-        // Persistir evento no Event Store e publicar no Kafka
         return eventStoreService.appendEvent(reservaId, "ReservaEstoque", evento)
             .flatMap(entry -> eventPublisher.publish(evento))
             .thenReturn(reservaId)
@@ -98,9 +91,6 @@ public class ReservaEstoqueCommandServiceImpl implements ReservaEstoqueCommandSe
             .doOnError(error -> log.error("Erro ao separar itens: id={}", id, error));
     }
 
-    /**
-     * Reconstitui o agregado a partir dos eventos no Event Store
-     */
     private Mono<ReservaEstoque> reconstituirAgregado(String aggregateId) {
         return eventStoreService.loadEvents(aggregateId)
             .flatMap(entry -> eventStoreService.deserializeEvent(entry, getEventClass(entry.getEventType())))

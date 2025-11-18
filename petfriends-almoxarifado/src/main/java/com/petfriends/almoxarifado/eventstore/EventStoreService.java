@@ -20,9 +20,6 @@ public class EventStoreService {
     private final EventStoreRepository repository;
     private final ObjectMapper objectMapper;
     
-    /**
-     * Adiciona um evento ao Event Store
-     */
     public <T extends BaseEvent<?>> Mono<EventStoreEntry> appendEvent(
             String aggregateId, 
             String aggregateType,
@@ -60,17 +57,11 @@ public class EventStoreService {
             });
     }
     
-    /**
-     * Carrega todos os eventos de um agregado
-     */
     public Flux<EventStoreEntry> loadEvents(String aggregateId) {
         return repository.findByAggregateIdOrderByVersionAsc(aggregateId)
             .doOnComplete(() -> log.debug("Loaded events for aggregateId={}", aggregateId));
     }
     
-    /**
-     * Desserializa um evento do JSON
-     */
     public <T> Mono<T> deserializeEvent(EventStoreEntry entry, Class<T> eventClass) {
         return Mono.fromCallable(() -> 
             objectMapper.readValue(entry.getEventData(), eventClass)
@@ -80,9 +71,6 @@ public class EventStoreService {
         });
     }
     
-    /**
-     * Reconstrói um agregado a partir dos eventos
-     */
     public <T> Flux<T> replayEvents(String aggregateId, Class<T> eventClass) {
         return loadEvents(aggregateId)
             .flatMap(entry -> deserializeEvent(entry, eventClass));

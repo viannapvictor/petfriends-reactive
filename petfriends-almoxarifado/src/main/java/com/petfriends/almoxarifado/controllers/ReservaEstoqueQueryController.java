@@ -8,10 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-/**
- * Controller de Queries (CQRS - Query Side)
- * Operações de consulta (Read Only)
- */
 @RestController
 @RequestMapping("/almoxarifado/reservas")
 @RequiredArgsConstructor

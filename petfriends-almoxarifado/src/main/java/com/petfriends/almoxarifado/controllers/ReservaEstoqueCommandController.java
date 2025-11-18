@@ -12,10 +12,6 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Controller de Comandos (CQRS - Command Side)
- * Operações que modificam estado
- */
 @RestController
 @RequestMapping("/almoxarifado/reservas")
 @RequiredArgsConstructor

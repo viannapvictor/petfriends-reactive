@@ -6,10 +6,6 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-/**
- * Publicador de Eventos no Kafka via Spring Cloud Stream
- * Arquitetura Reativa com Event-Driven
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -17,12 +13,6 @@ public class EventPublisher {
 
     private final StreamBridge streamBridge;
 
-    /**
-     * Publica evento no tópico Kafka de forma reativa
-     *
-     * @param event Evento a ser publicado
-     * @return Mono<Void> indicando sucesso ou erro
-     */
     public Mono<Void> publish(BaseEvent<?> event) {
         return Mono.fromRunnable(() -> {
             try {

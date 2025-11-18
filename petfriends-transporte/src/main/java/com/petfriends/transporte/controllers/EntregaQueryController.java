@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- * Controller de Queries (CQRS - Query Side)
- * Operações de consulta (Read Only)
- */
 @RestController
 @RequestMapping("/transporte/entregas")
 @RequiredArgsConstructor

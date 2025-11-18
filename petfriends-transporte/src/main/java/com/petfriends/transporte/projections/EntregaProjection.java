@@ -13,10 +13,6 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
-/**
- * Projection para Entrega
- * Consome eventos do Kafka e atualiza o Read Model
- */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -24,9 +20,6 @@ public class EntregaProjection {
     
     private final EntregaViewRepository viewRepository;
     
-    /**
-     * Consome eventos do tópico transporte-events
-     */
     @Bean
     public Function<Flux<BaseEvent<?>>, Mono<Void>> transporteEventsIn() {
         return flux -> flux
@@ -35,9 +28,6 @@ public class EntregaProjection {
             .then();
     }
     
-    /**
-     * Consome eventos do Almoxarifado (integração entre serviços)
-     */
     @Bean
     public Function<Flux<Object>, Mono<Void>> almoxarifadoEventsIn() {
         return flux -> flux
@@ -62,8 +52,6 @@ public class EntregaProjection {
     }
     
     private Mono<Void> handleAlmoxarifadoEvent(Object event) {
-        // Aqui podemos reagir a eventos do Almoxarifado
-        // Por exemplo: quando itens são separados, podemos criar automaticamente uma entrega
         log.debug("Processing Almoxarifado event: {}", event.getClass().getSimpleName());
         return Mono.empty();
     }
@@ -92,7 +80,7 @@ public class EntregaProjection {
                 view.setMotoristaId(event.motoristaId);
                 view.setVeiculoId(event.veiculoId);
                 view.setUpdatedAt(LocalDateTime.now());
-                view.markAsExisting(); // Marca como existente para fazer UPDATE
+                view.markAsExisting();
                 return viewRepository.save(view);
             })
             .then()
@@ -106,7 +94,7 @@ public class EntregaProjection {
                 view.setRecebedor(event.recebedor);
                 view.setDataHoraRecebimento(event.dataHoraRecebimento.toString());
                 view.setUpdatedAt(LocalDateTime.now());
-                view.markAsExisting(); // Marca como existente para fazer UPDATE
+                view.markAsExisting();
                 return viewRepository.save(view);
             })
             .then()

@@ -7,10 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-/**
- * Service de Queries - CQRS Query Side
- * Usa Read Model otimizado para consultas
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor

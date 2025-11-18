@@ -13,10 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Service de Comandos - CQRS Command Side
- * Arquitetura Reativa com Event Sourcing
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,14 +31,11 @@ public class EntregaCommandServiceImpl implements EntregaCommandService {
             entregaId, pedidoId, reservaId, endereco, LocalDate.parse(dataPrevisaoEntrega)
         );
         
-        // Criar novo agregado e executar comando
         Entrega agregado = new Entrega(entregaId);
         BaseEvent<?> evento = agregado.agendarEntrega(comando);
         
-        // Aplicar evento ao agregado
         agregado.apply(evento);
 
-        // Persistir evento no Event Store e publicar no Kafka
         return eventStoreService.appendEvent(entregaId, "Entrega", evento)
             .flatMap(entry -> eventPublisher.publish(evento))
             .thenReturn(entregaId)
@@ -85,9 +78,6 @@ public class EntregaCommandServiceImpl implements EntregaCommandService {
             .doOnError(error -> log.error("Erro ao concluir entrega: id={}", id, error));
     }
 
-    /**
-     * Reconstitui o agregado a partir dos eventos no Event Store
-     */
     private Mono<Entrega> reconstituirAgregado(String aggregateId) {
         return eventStoreService.loadEvents(aggregateId)
             .flatMap(entry -> eventStoreService.deserializeEvent(entry, getEventClass(entry.getEventType())))

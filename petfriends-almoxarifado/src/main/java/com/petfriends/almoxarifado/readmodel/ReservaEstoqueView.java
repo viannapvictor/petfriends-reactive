@@ -12,10 +12,6 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
-/**
- * Read Model para Reserva de Estoque
- * Otimizado para consultas (CQRS - Query Side)
- */
 @Data
 @Builder
 @NoArgsConstructor

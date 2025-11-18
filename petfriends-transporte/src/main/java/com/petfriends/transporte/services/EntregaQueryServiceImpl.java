@@ -8,10 +8,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- * Service de Queries - CQRS Query Side
- * Usa Read Model otimizado para consultas
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor

@@ -9,10 +9,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
-/**
- * Cliente HTTP para comunicação com o serviço de Almoxarifado
- * Usa WebClient reativo para consultas HTTP
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -20,9 +16,6 @@ public class AlmoxarifadoClient {
     
     private final WebClient almoxarifadoWebClient;
     
-    /**
-     * Consulta status de uma reserva de estoque
-     */
     public Mono<ReservaEstoqueDTO> consultarReserva(String reservaId) {
         return almoxarifadoWebClient
             .get()
@@ -38,9 +31,6 @@ public class AlmoxarifadoClient {
             });
     }
     
-    /**
-     * Consulta reserva por pedido ID
-     */
     public Mono<ReservaEstoqueDTO> consultarReservaPorPedido(String pedidoId) {
         return almoxarifadoWebClient
             .get()
@@ -53,18 +43,12 @@ public class AlmoxarifadoClient {
             .onErrorResume(error -> Mono.empty());
     }
     
-    /**
-     * Verifica se uma reserva está pronta para entrega (status SEPARADA)
-     */
     public Mono<Boolean> reservaProntaParaEntrega(String reservaId) {
         return consultarReserva(reservaId)
             .map(reserva -> "SEPARADA".equals(reserva.getStatus()))
             .defaultIfEmpty(false);
     }
     
-    /**
-     * DTO para Reserva de Estoque
-     */
     @Data
     public static class ReservaEstoqueDTO {
         private String id;

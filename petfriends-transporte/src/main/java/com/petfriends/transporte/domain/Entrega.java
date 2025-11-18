@@ -4,11 +4,6 @@ import com.petfriends.transporte.commands.*;
 import com.petfriends.transporte.events.*;
 import lombok.Data;
 
-/**
- * Agregado Entrega - DDD Aggregate Root
- * Gerencia o ciclo de vida de entregas
- * Arquitetura: Pure POJO (sem Axon/JPA) + Event Sourcing
- */
 @Data
 public class Entrega {
 
@@ -30,9 +25,6 @@ public class Entrega {
         this.id = id;
     }
 
-    /**
-     * Command: Agendar Entrega
-     */
     public BaseEvent<?> agendarEntrega(AgendarEntregaCommand comando) {
         if (comando.endereco == null) {
             throw new IllegalArgumentException("Endereço de entrega é obrigatório");
@@ -49,9 +41,6 @@ public class Entrega {
         );
     }
 
-    /**
-     * Command: Iniciar Transporte
-     */
     public BaseEvent<?> iniciarTransporte(IniciarTransporteCommand comando) {
         if (!StatusEntrega.AGENDADA.toString().equals(this.status)) {
             throw new IllegalStateException("Só é possível iniciar transporte de entregas agendadas");
@@ -60,9 +49,6 @@ public class Entrega {
         return new TransporteIniciado(comando.id, comando.motoristaId, comando.veiculoId);
     }
 
-    /**
-     * Command: Concluir Entrega
-     */
     public BaseEvent<?> concluirEntrega(ConcluirEntregaCommand comando) {
         if (!StatusEntrega.EM_TRANSITO.toString().equals(this.status)) {
             throw new IllegalStateException("Só é possível concluir entregas em trânsito");
@@ -77,9 +63,6 @@ public class Entrega {
         );
     }
 
-    /**
-     * Aplica evento ao agregado (Event Sourcing)
-     */
     public void apply(BaseEvent<?> evento) {
         if (evento instanceof EntregaAgendada) {
             on((EntregaAgendada) evento);
@@ -90,7 +73,6 @@ public class Entrega {
         }
     }
 
-    // Event Handlers (reconstroem o estado)
     protected void on(EntregaAgendada evento) {
         this.id = evento.id;
         this.pedidoId = evento.pedidoId;

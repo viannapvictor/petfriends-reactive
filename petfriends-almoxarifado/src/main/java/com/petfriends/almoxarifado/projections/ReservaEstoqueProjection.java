@@ -16,10 +16,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.function.Function;
 
-/**
- * Projection para Reserva de Estoque
- * Consome eventos do Kafka e atualiza o Read Model
- */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -28,9 +24,6 @@ public class ReservaEstoqueProjection {
     private final ReservaEstoqueViewRepository viewRepository;
     private final ReservaEstoqueItemViewRepository itemViewRepository;
     
-    /**
-     * Consome eventos do tópico almoxarifado-events
-     */
     @Bean
     public Function<Flux<BaseEvent<?>>, Mono<Void>> almoxarifadoEventsIn() {
         return flux -> flux
@@ -100,7 +93,7 @@ public class ReservaEstoqueProjection {
             .flatMap(view -> {
                 view.setStatus("CONFIRMADA");
                 view.setUpdatedAt(LocalDateTime.now());
-                view.markAsExisting(); // Marca como existente para fazer UPDATE
+                view.markAsExisting();
                 return viewRepository.save(view);
             })
             .then()
@@ -112,7 +105,7 @@ public class ReservaEstoqueProjection {
             .flatMap(view -> {
                 view.setStatus("CANCELADA");
                 view.setUpdatedAt(LocalDateTime.now());
-                view.markAsExisting(); // Marca como existente para fazer UPDATE
+                view.markAsExisting();
                 return viewRepository.save(view);
             })
             .then()
@@ -125,7 +118,7 @@ public class ReservaEstoqueProjection {
                 view.setStatus("SEPARADA");
                 view.setOperadorId(event.operadorId);
                 view.setUpdatedAt(LocalDateTime.now());
-                view.markAsExisting(); // Marca como existente para fazer UPDATE
+                view.markAsExisting();
                 return viewRepository.save(view);
             })
             .then()
