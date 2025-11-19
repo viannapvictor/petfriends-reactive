@@ -2,6 +2,7 @@ package com.petfriends.almoxarifado.controllers;
 
 import com.petfriends.almoxarifado.services.ReservaEstoqueCommandService;
 import com.petfriends.almoxarifado.services.ReservaEstoqueCommandService.ItemReservaRequest;
+import com.petfriends.almoxarifado.services.ReservaEstoqueCommandService.EnderecoRequest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,17 @@ public class ReservaEstoqueCommandController {
     @PostMapping
     public Mono<ResponseEntity<Map<String, String>>> reservarEstoque(
             @RequestBody ReservaRequest request) {
-        return service.reservarEstoque(request.pedidoId, request.itens)
+        
+        EnderecoRequest enderecoRequest = new EnderecoRequest();
+        enderecoRequest.rua = request.endereco.getRua();
+        enderecoRequest.numero = request.endereco.getNumero();
+        enderecoRequest.complemento = request.endereco.getComplemento();
+        enderecoRequest.bairro = request.endereco.getBairro();
+        enderecoRequest.cidade = request.endereco.getCidade();
+        enderecoRequest.estado = request.endereco.getEstado();
+        enderecoRequest.cep = request.endereco.getCep();
+        
+        return service.reservarEstoque(request.pedidoId, enderecoRequest, request.itens)
             .map(reservaId -> ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(Map.of("reservaId", reservaId, "message", "Estoque reservado com sucesso")))
@@ -67,7 +78,19 @@ public class ReservaEstoqueCommandController {
     @Data
     public static class ReservaRequest {
         private String pedidoId;
+        private EnderecoDTO endereco;
         private List<ItemReservaRequest> itens;
+    }
+    
+    @Data
+    public static class EnderecoDTO {
+        private String rua;
+        private String numero;
+        private String complemento;
+        private String bairro;
+        private String cidade;
+        private String estado;
+        private String cep;
     }
 
     @Data

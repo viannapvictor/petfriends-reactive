@@ -18,22 +18,6 @@ public class EntregaCommandController {
 
     private final EntregaCommandService service;
 
-    @PostMapping
-    public Mono<ResponseEntity<Map<String, String>>> agendarEntrega(
-            @RequestBody AgendarEntregaRequest request) {
-        return service.agendarEntrega(
-                request.pedidoId, 
-                request.reservaId, 
-                request.endereco, 
-                request.dataPrevisaoEntrega)
-            .map(entregaId -> ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(Map.of("entregaId", entregaId, "message", "Entrega agendada com sucesso")))
-            .onErrorResume(error -> Mono.just(ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", error.getMessage()))));
-    }
-
     @PutMapping("/{id}/iniciar")
     public Mono<ResponseEntity<Map<String, String>>> iniciarTransporte(
             @PathVariable String id,

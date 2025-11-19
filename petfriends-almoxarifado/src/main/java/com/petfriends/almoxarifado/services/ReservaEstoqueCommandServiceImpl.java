@@ -1,6 +1,7 @@
 package com.petfriends.almoxarifado.services;
 
 import com.petfriends.almoxarifado.commands.*;
+import com.petfriends.almoxarifado.domain.Endereco;
 import com.petfriends.almoxarifado.domain.ReservaEstoque;
 import com.petfriends.almoxarifado.events.*;
 import com.petfriends.almoxarifado.eventstore.EventStoreService;
@@ -22,14 +23,24 @@ public class ReservaEstoqueCommandServiceImpl implements ReservaEstoqueCommandSe
     private final EventPublisher eventPublisher;
 
     @Override
-    public Mono<String> reservarEstoque(String pedidoId, List<ItemReservaRequest> itens) {
+    public Mono<String> reservarEstoque(String pedidoId, EnderecoRequest enderecoReq, List<ItemReservaRequest> itens) {
         String reservaId = UUID.randomUUID().toString();
+
+        Endereco endereco = new Endereco(
+            enderecoReq.rua,
+            enderecoReq.numero,
+            enderecoReq.complemento,
+            enderecoReq.bairro,
+            enderecoReq.cidade,
+            enderecoReq.estado,
+            enderecoReq.cep
+        );
 
         List<ReservarEstoqueCommand.ItemReservaDTO> itensDTO = itens.stream()
                 .map(item -> new ReservarEstoqueCommand.ItemReservaDTO(item.produtoId, item.quantidade))
                 .collect(Collectors.toList());
 
-        ReservarEstoqueCommand comando = new ReservarEstoqueCommand(reservaId, pedidoId, itensDTO);
+        ReservarEstoqueCommand comando = new ReservarEstoqueCommand(reservaId, pedidoId, endereco, itensDTO);
         
         ReservaEstoque agregado = new ReservaEstoque(reservaId);
         BaseEvent<?> evento = agregado.reservarEstoque(comando);
@@ -97,11 +108,7 @@ public class ReservaEstoqueCommandServiceImpl implements ReservaEstoqueCommandSe
             .collectList()
             .map(events -> {
                 ReservaEstoque agregado = new ReservaEstoque(aggregateId);
-                events.forEach(evento -> {
-                    log.debug("Replaying event: type={}, version={}", evento.getClass().getSimpleName(), events.indexOf(evento) + 1);
-                    agregado.apply((BaseEvent<?>) evento);
-                });
-                log.info("Aggregate reconstituted: id={}, status={}, events={}", aggregateId, agregado.getStatus(), events.size());
+                events.forEach(evento -> agregado.apply((BaseEvent<?>) evento));
                 return agregado;
             });
     }

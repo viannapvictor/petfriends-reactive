@@ -18,6 +18,13 @@ CREATE TABLE IF NOT EXISTS reserva_estoque_view (
     id VARCHAR(255) PRIMARY KEY,
     pedido_id VARCHAR(255) NOT NULL,
     status VARCHAR(50) NOT NULL,
+    endereco_rua VARCHAR(255),
+    endereco_numero VARCHAR(50),
+    endereco_complemento VARCHAR(255),
+    endereco_bairro VARCHAR(100),
+    endereco_cidade VARCHAR(100),
+    endereco_estado VARCHAR(2),
+    endereco_cep VARCHAR(9),
     operador_id VARCHAR(255),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
@@ -25,6 +32,8 @@ CREATE TABLE IF NOT EXISTS reserva_estoque_view (
 
 CREATE INDEX idx_reserva_estoque_view_pedido_id ON reserva_estoque_view(pedido_id);
 CREATE INDEX idx_reserva_estoque_view_status ON reserva_estoque_view(status);
+CREATE INDEX idx_reserva_endereco_cidade ON reserva_estoque_view(endereco_cidade);
+CREATE INDEX idx_reserva_endereco_estado ON reserva_estoque_view(endereco_estado);
 
 CREATE TABLE IF NOT EXISTS reserva_estoque_item_view (
     id UUID PRIMARY KEY,

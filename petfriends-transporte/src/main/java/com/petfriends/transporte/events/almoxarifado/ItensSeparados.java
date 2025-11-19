@@ -1,20 +1,21 @@
-package com.petfriends.almoxarifado.events;
+package com.petfriends.transporte.events.almoxarifado;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.petfriends.almoxarifado.domain.Endereco;
+import com.petfriends.transporte.domain.Endereco;
 
 import java.time.LocalDateTime;
 
-public class ItensSeparados extends BaseEvent<String> {
+public class ItensSeparados {
 
+    public final String id;
     public final String pedidoId;
     public final Endereco enderecoEntrega;
     public final String operadorId;
     public final LocalDateTime dataSeparacao;
 
     public ItensSeparados() {
-        super();
+        this.id = null;
         this.pedidoId = null;
         this.enderecoEntrega = null;
         this.operadorId = null;
@@ -28,18 +29,11 @@ public class ItensSeparados extends BaseEvent<String> {
             @JsonProperty("enderecoEntrega") Endereco enderecoEntrega,
             @JsonProperty("operadorId") String operadorId,
             @JsonProperty("dataSeparacao") LocalDateTime dataSeparacao) {
-        super(id);
+        this.id = id;
         this.pedidoId = pedidoId;
         this.enderecoEntrega = enderecoEntrega;
         this.operadorId = operadorId;
         this.dataSeparacao = dataSeparacao != null ? dataSeparacao : LocalDateTime.now();
     }
-
-    public ItensSeparados(String id, String pedidoId, Endereco enderecoEntrega, String operadorId) {
-        super(id);
-        this.pedidoId = pedidoId;
-        this.enderecoEntrega = enderecoEntrega;
-        this.operadorId = operadorId;
-        this.dataSeparacao = LocalDateTime.now();
-    }
 }
+

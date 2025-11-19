@@ -32,6 +32,27 @@ public class ReservaEstoqueView implements Persistable<String> {
     @Column("status")
     private String status;
     
+    @Column("endereco_rua")
+    private String enderecoRua;
+    
+    @Column("endereco_numero")
+    private String enderecoNumero;
+    
+    @Column("endereco_complemento")
+    private String enderecoComplemento;
+    
+    @Column("endereco_bairro")
+    private String enderecoBairro;
+    
+    @Column("endereco_cidade")
+    private String enderecoCidade;
+    
+    @Column("endereco_estado")
+    private String enderecoEstado;
+    
+    @Column("endereco_cep")
+    private String enderecoCep;
+    
     @Column("operador_id")
     private String operadorId;
     

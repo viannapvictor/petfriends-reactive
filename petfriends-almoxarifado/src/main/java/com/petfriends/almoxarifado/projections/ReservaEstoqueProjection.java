@@ -55,6 +55,13 @@ public class ReservaEstoqueProjection {
             .id(event.id)
             .pedidoId(event.pedidoId)
             .status("PENDENTE")
+            .enderecoRua(event.enderecoEntrega != null ? event.enderecoEntrega.getRua() : null)
+            .enderecoNumero(event.enderecoEntrega != null ? event.enderecoEntrega.getNumero() : null)
+            .enderecoComplemento(event.enderecoEntrega != null ? event.enderecoEntrega.getComplemento() : null)
+            .enderecoBairro(event.enderecoEntrega != null ? event.enderecoEntrega.getBairro() : null)
+            .enderecoCidade(event.enderecoEntrega != null ? event.enderecoEntrega.getCidade() : null)
+            .enderecoEstado(event.enderecoEntrega != null ? event.enderecoEntrega.getEstado() : null)
+            .enderecoCep(event.enderecoEntrega != null ? event.enderecoEntrega.getCep() : null)
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();

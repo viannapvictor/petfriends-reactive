@@ -13,6 +13,7 @@ public class ReservaEstoque {
 
     private String id;
     private String pedidoId;
+    private Endereco enderecoEntrega;
     private String status;
     private List<ItemReserva> itens;
     private String operadorId;
@@ -38,7 +39,7 @@ public class ReservaEstoque {
                     .map(item -> new EstoqueReservado.ItemReservado(item.produtoId, item.quantidade))
                     .collect(Collectors.toList());
 
-            return new EstoqueReservado(comando.id, comando.pedidoId, itensReservados);
+            return new EstoqueReservado(comando.id, comando.pedidoId, comando.enderecoEntrega, itensReservados);
         } else {
             List<String> produtosIndisponiveis = comando.itens.stream()
                     .map(item -> item.produtoId)
@@ -74,7 +75,7 @@ public class ReservaEstoque {
             throw new IllegalStateException("Só é possível separar itens de reservas confirmadas");
         }
 
-        return new ItensSeparados(comando.id, this.pedidoId, comando.operadorId);
+        return new ItensSeparados(comando.id, this.pedidoId, this.enderecoEntrega, comando.operadorId);
     }
 
     public void apply(BaseEvent<?> evento) {
@@ -94,6 +95,7 @@ public class ReservaEstoque {
     protected void on(EstoqueReservado evento) {
         this.id = evento.id;
         this.pedidoId = evento.pedidoId;
+        this.enderecoEntrega = evento.enderecoEntrega;
         this.status = StatusReserva.PENDENTE.toString();
         this.itens = evento.itens.stream()
                 .map(item -> new ItemReserva(item.produtoId, item.quantidade))

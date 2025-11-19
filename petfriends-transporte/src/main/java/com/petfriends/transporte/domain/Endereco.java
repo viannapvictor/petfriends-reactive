@@ -1,4 +1,4 @@
-package com.petfriends.almoxarifado.domain;
+package com.petfriends.transporte.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

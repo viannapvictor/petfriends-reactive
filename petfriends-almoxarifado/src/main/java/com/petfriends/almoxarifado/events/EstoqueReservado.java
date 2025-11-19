@@ -2,6 +2,7 @@ package com.petfriends.almoxarifado.events;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.petfriends.almoxarifado.domain.Endereco;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,12 +10,14 @@ import java.util.List;
 public class EstoqueReservado extends BaseEvent<String> {
 
     public final String pedidoId;
+    public final Endereco enderecoEntrega;
     public final List<ItemReservado> itens;
     public final LocalDateTime dataReserva;
 
     public EstoqueReservado() {
         super();
         this.pedidoId = null;
+        this.enderecoEntrega = null;
         this.itens = null;
         this.dataReserva = null;
     }
@@ -23,17 +26,20 @@ public class EstoqueReservado extends BaseEvent<String> {
     public EstoqueReservado(
             @JsonProperty("id") String id,
             @JsonProperty("pedidoId") String pedidoId,
+            @JsonProperty("enderecoEntrega") Endereco enderecoEntrega,
             @JsonProperty("itens") List<ItemReservado> itens,
             @JsonProperty("dataReserva") LocalDateTime dataReserva) {
         super(id);
         this.pedidoId = pedidoId;
+        this.enderecoEntrega = enderecoEntrega;
         this.itens = itens;
         this.dataReserva = dataReserva != null ? dataReserva : LocalDateTime.now();
     }
 
-    public EstoqueReservado(String id, String pedidoId, List<ItemReservado> itens) {
+    public EstoqueReservado(String id, String pedidoId, Endereco enderecoEntrega, List<ItemReservado> itens) {
         super(id);
         this.pedidoId = pedidoId;
+        this.enderecoEntrega = enderecoEntrega;
         this.itens = itens;
         this.dataReserva = LocalDateTime.now();
     }

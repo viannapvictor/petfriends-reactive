@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ReservaEstoqueCommandService {
     
-    Mono<String> reservarEstoque(String pedidoId, List<ItemReservaRequest> itens);
+    Mono<String> reservarEstoque(String pedidoId, EnderecoRequest endereco, List<ItemReservaRequest> itens);
     
     Mono<String> confirmarReserva(String id);
     
@@ -19,5 +19,16 @@ public interface ReservaEstoqueCommandService {
     class ItemReservaRequest {
         public String produtoId;
         public int quantidade;
+    }
+    
+    @Data
+    class EnderecoRequest {
+        public String rua;
+        public String numero;
+        public String complemento;
+        public String bairro;
+        public String cidade;
+        public String estado;
+        public String cep;
     }
 }

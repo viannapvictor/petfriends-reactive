@@ -34,7 +34,7 @@ spring:
           destination: transporte-events
           content-type: application/json
           group: transporte-projection-group
-        almoxarifadoEventsIn-in-1:
+        almoxarifadoEventsIn-in-0:
           destination: almoxarifado-events
           content-type: application/json
           group: transporte-almoxarifado-consumer-group
