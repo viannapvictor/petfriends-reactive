@@ -34,11 +34,39 @@ public class EntregaCommandController {
     public Mono<ResponseEntity<Map<String, String>>> concluirEntrega(
             @PathVariable String id,
             @RequestBody ConcluirEntregaRequest request) {
-        return service.concluirEntrega(id, request.recebedor, 
-                                        request.dataRecebimento, 
+        return service.concluirEntrega(id, request.recebedor,
+                                        request.dataRecebimento,
                                         request.observacoes)
             .map(entregaId -> ResponseEntity.ok(
                 Map.of("entregaId", entregaId, "message", "Entrega concluída com sucesso")))
+            .onErrorResume(error -> Mono.just(ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", error.getMessage()))));
+    }
+
+    @PutMapping("/{id}/devolver")
+    public Mono<ResponseEntity<Map<String, String>>> devolverEntrega(
+            @PathVariable String id,
+            @RequestBody DevolverEntregaRequest request) {
+        return service.devolverEntrega(id, request.motivo,
+                                        request.dataDevolucao,
+                                        request.responsavel)
+            .map(entregaId -> ResponseEntity.ok(
+                Map.of("entregaId", entregaId, "message", "Entrega devolvida com sucesso")))
+            .onErrorResume(error -> Mono.just(ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", error.getMessage()))));
+    }
+
+    @PutMapping("/{id}/marcar-extraviada")
+    public Mono<ResponseEntity<Map<String, String>>> marcarExtraviada(
+            @PathVariable String id,
+            @RequestBody MarcarExtraviadaRequest request) {
+        return service.marcarExtraviada(id, request.motivo,
+                                         request.dataExtravio,
+                                         request.localUltimoRegistro)
+            .map(entregaId -> ResponseEntity.ok(
+                Map.of("entregaId", entregaId, "message", "Entrega marcada como extraviada")))
             .onErrorResume(error -> Mono.just(ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", error.getMessage()))));
@@ -63,5 +91,19 @@ public class EntregaCommandController {
         private String recebedor;
         private String dataRecebimento;
         private String observacoes;
+    }
+
+    @Data
+    public static class DevolverEntregaRequest {
+        private String motivo;
+        private String dataDevolucao;
+        private String responsavel;
+    }
+
+    @Data
+    public static class MarcarExtraviadaRequest {
+        private String motivo;
+        private String dataExtravio;
+        private String localUltimoRegistro;
     }
 }

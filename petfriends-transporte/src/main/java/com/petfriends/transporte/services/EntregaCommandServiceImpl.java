@@ -60,7 +60,7 @@ public class EntregaCommandServiceImpl implements EntregaCommandService {
     }
 
     @Override
-    public Mono<String> concluirEntrega(String id, String recebedor, 
+    public Mono<String> concluirEntrega(String id, String recebedor,
                                          String dataRecebimento, String observacoes) {
         return reconstituirAgregado(id)
             .flatMap(agregado -> {
@@ -69,13 +69,51 @@ public class EntregaCommandServiceImpl implements EntregaCommandService {
                 );
                 BaseEvent<?> evento = agregado.concluirEntrega(comando);
                 agregado.apply(evento);
-                
+
                 return eventStoreService.appendEvent(id, "Entrega", evento)
                     .flatMap(entry -> eventPublisher.publish(evento))
                     .thenReturn(id);
             })
             .doOnSuccess(entregaId -> log.info("Entrega concluída: entregaId={}, recebedor={}", entregaId, recebedor))
             .doOnError(error -> log.error("Erro ao concluir entrega: id={}", id, error));
+    }
+
+    @Override
+    public Mono<String> devolverEntrega(String id, String motivo,
+                                         String dataDevolucao, String responsavel) {
+        return reconstituirAgregado(id)
+            .flatMap(agregado -> {
+                DevolverEntregaCommand comando = new DevolverEntregaCommand(
+                    id, motivo, LocalDateTime.parse(dataDevolucao), responsavel
+                );
+                BaseEvent<?> evento = agregado.devolverEntrega(comando);
+                agregado.apply(evento);
+
+                return eventStoreService.appendEvent(id, "Entrega", evento)
+                    .flatMap(entry -> eventPublisher.publish(evento))
+                    .thenReturn(id);
+            })
+            .doOnSuccess(entregaId -> log.info("Entrega devolvida: entregaId={}, motivo={}", entregaId, motivo))
+            .doOnError(error -> log.error("Erro ao devolver entrega: id={}", id, error));
+    }
+
+    @Override
+    public Mono<String> marcarExtraviada(String id, String motivo,
+                                          String dataExtravio, String localUltimoRegistro) {
+        return reconstituirAgregado(id)
+            .flatMap(agregado -> {
+                MarcarEntregaExtraviadaCommand comando = new MarcarEntregaExtraviadaCommand(
+                    id, motivo, LocalDateTime.parse(dataExtravio), localUltimoRegistro
+                );
+                BaseEvent<?> evento = agregado.marcarExtraviada(comando);
+                agregado.apply(evento);
+
+                return eventStoreService.appendEvent(id, "Entrega", evento)
+                    .flatMap(entry -> eventPublisher.publish(evento))
+                    .thenReturn(id);
+            })
+            .doOnSuccess(entregaId -> log.info("Entrega marcada como extraviada: entregaId={}, motivo={}", entregaId, motivo))
+            .doOnError(error -> log.error("Erro ao marcar entrega como extraviada: id={}", id, error));
     }
 
     private Mono<Entrega> reconstituirAgregado(String aggregateId) {
@@ -101,6 +139,10 @@ public class EntregaCommandServiceImpl implements EntregaCommandService {
                 return TransporteIniciado.class;
             case "EntregaConcluida":
                 return EntregaConcluida.class;
+            case "EntregaDevolvida":
+                return EntregaDevolvida.class;
+            case "EntregaExtraviada":
+                return EntregaExtraviada.class;
             default:
                 throw new IllegalArgumentException("Unknown event type: " + eventType);
         }

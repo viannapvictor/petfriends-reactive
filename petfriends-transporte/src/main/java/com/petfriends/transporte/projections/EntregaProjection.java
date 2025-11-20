@@ -56,6 +56,10 @@ public class EntregaProjection {
             return handleTransporteIniciado((TransporteIniciado) event);
         } else if (event instanceof EntregaConcluida) {
             return handleEntregaConcluida((EntregaConcluida) event);
+        } else if (event instanceof EntregaDevolvida) {
+            return handleEntregaDevolvida((EntregaDevolvida) event);
+        } else if (event instanceof EntregaExtraviada) {
+            return handleEntregaExtraviada((EntregaExtraviada) event);
         }
 
         return Mono.empty();
@@ -155,6 +159,36 @@ public class EntregaProjection {
             })
             .then()
             .doOnSuccess(v -> log.info("Read model updated: EntregaConcluida - entregaId={}", event.id));
+    }
+
+    private Mono<Void> handleEntregaDevolvida(EntregaDevolvida event) {
+        return viewRepository.findById(event.id)
+            .flatMap(view -> {
+                view.setStatus("DEVOLVIDA");
+                view.setMotivoDevolucao(event.motivo);
+                view.setDataDevolucao(event.dataDevolucao.toString());
+                view.setResponsavelDevolucao(event.responsavel);
+                view.setUpdatedAt(LocalDateTime.now());
+                view.markAsExisting();
+                return viewRepository.save(view);
+            })
+            .then()
+            .doOnSuccess(v -> log.info("Read model updated: EntregaDevolvida - entregaId={}", event.id));
+    }
+
+    private Mono<Void> handleEntregaExtraviada(EntregaExtraviada event) {
+        return viewRepository.findById(event.id)
+            .flatMap(view -> {
+                view.setStatus("EXTRAVIADA");
+                view.setMotivoExtravio(event.motivo);
+                view.setDataExtravio(event.dataExtravio.toString());
+                view.setLocalUltimoRegistro(event.localUltimoRegistro);
+                view.setUpdatedAt(LocalDateTime.now());
+                view.markAsExisting();
+                return viewRepository.save(view);
+            })
+            .then()
+            .doOnSuccess(v -> log.info("Read model updated: EntregaExtraviada - entregaId={}", event.id));
     }
 }
 

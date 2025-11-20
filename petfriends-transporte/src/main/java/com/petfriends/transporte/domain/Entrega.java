@@ -63,6 +63,34 @@ public class Entrega {
         );
     }
 
+    public BaseEvent<?> devolverEntrega(DevolverEntregaCommand comando) {
+        if (!StatusEntrega.CONCLUIDA.toString().equals(this.status)) {
+            throw new IllegalStateException("Só é possível devolver entregas concluídas");
+        }
+
+        return new EntregaDevolvida(
+                comando.id,
+                this.pedidoId,
+                comando.motivo,
+                comando.dataDevolucao,
+                comando.responsavel
+        );
+    }
+
+    public BaseEvent<?> marcarExtraviada(MarcarEntregaExtraviadaCommand comando) {
+        if (!StatusEntrega.EM_TRANSITO.toString().equals(this.status)) {
+            throw new IllegalStateException("Só é possível marcar como extraviada entregas em trânsito");
+        }
+
+        return new EntregaExtraviada(
+                comando.id,
+                this.pedidoId,
+                comando.motivo,
+                comando.dataExtravio,
+                comando.localUltimoRegistro
+        );
+    }
+
     public void apply(BaseEvent<?> evento) {
         if (evento instanceof EntregaAgendada) {
             on((EntregaAgendada) evento);
@@ -70,6 +98,10 @@ public class Entrega {
             on((TransporteIniciado) evento);
         } else if (evento instanceof EntregaConcluida) {
             on((EntregaConcluida) evento);
+        } else if (evento instanceof EntregaDevolvida) {
+            on((EntregaDevolvida) evento);
+        } else if (evento instanceof EntregaExtraviada) {
+            on((EntregaExtraviada) evento);
         }
     }
 
@@ -92,6 +124,14 @@ public class Entrega {
         this.status = StatusEntrega.CONCLUIDA.toString();
         this.recebedor = evento.recebedor;
         this.dataHoraRecebimento = evento.dataHoraRecebimento.toString();
+    }
+
+    protected void on(EntregaDevolvida evento) {
+        this.status = StatusEntrega.DEVOLVIDA.toString();
+    }
+
+    protected void on(EntregaExtraviada evento) {
+        this.status = StatusEntrega.EXTRAVIADA.toString();
     }
 
     private String formatarEndereco(AgendarEntregaCommand.EnderecoDTO endereco) {

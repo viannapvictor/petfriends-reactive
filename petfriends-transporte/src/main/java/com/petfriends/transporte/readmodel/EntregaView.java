@@ -52,10 +52,28 @@ public class EntregaView implements Persistable<String> {
     
     @Column("data_hora_recebimento")
     private String dataHoraRecebimento;
-    
+
+    @Column("motivo_devolucao")
+    private String motivoDevolucao;
+
+    @Column("data_devolucao")
+    private String dataDevolucao;
+
+    @Column("responsavel_devolucao")
+    private String responsavelDevolucao;
+
+    @Column("motivo_extravio")
+    private String motivoExtravio;
+
+    @Column("data_extravio")
+    private String dataExtravio;
+
+    @Column("local_ultimo_registro")
+    private String localUltimoRegistro;
+
     @Column("created_at")
     private LocalDateTime createdAt;
-    
+
     @Column("updated_at")
     private LocalDateTime updatedAt;
     

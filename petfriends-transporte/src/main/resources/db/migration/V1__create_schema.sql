@@ -25,6 +25,12 @@ CREATE TABLE IF NOT EXISTS entrega_view (
     veiculo_id VARCHAR(255),
     recebedor VARCHAR(255),
     data_hora_recebimento VARCHAR(50),
+    motivo_devolucao TEXT,
+    data_devolucao VARCHAR(50),
+    responsavel_devolucao VARCHAR(255),
+    motivo_extravio TEXT,
+    data_extravio VARCHAR(50),
+    local_ultimo_registro VARCHAR(255),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );

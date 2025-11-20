@@ -4,5 +4,6 @@ public enum StatusEntrega {
     AGENDADA,
     EM_TRANSITO,
     CONCLUIDA,
-    CANCELADA
+    DEVOLVIDA,
+    EXTRAVIADA
 }

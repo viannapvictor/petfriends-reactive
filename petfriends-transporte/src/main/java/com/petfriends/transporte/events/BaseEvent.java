@@ -11,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = EntregaAgendada.class, name = "EntregaAgendada"),
     @JsonSubTypes.Type(value = TransporteIniciado.class, name = "TransporteIniciado"),
-    @JsonSubTypes.Type(value = EntregaConcluida.class, name = "EntregaConcluida")
+    @JsonSubTypes.Type(value = EntregaConcluida.class, name = "EntregaConcluida"),
+    @JsonSubTypes.Type(value = EntregaDevolvida.class, name = "EntregaDevolvida"),
+    @JsonSubTypes.Type(value = EntregaExtraviada.class, name = "EntregaExtraviada")
 })
 public class BaseEvent<T> {
 
