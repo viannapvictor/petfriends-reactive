@@ -86,6 +86,7 @@ services:
       MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_COM_PETFRIENDS_ALMOXARIFADO: DEBUG
+      LOGGING_PATTERN_LEVEL: "%5p [%X{spring.application.name},%X{traceId},%X{spanId}]"
     networks:
       - petfriends-network
     restart: unless-stopped
@@ -123,6 +124,7 @@ services:
       MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_COM_PETFRIENDS_TRANSPORTE: DEBUG
+      LOGGING_PATTERN_LEVEL: "%5p [%X{spring.application.name},%X{traceId},%X{spanId}]"
     networks:
       - petfriends-network
     restart: unless-stopped

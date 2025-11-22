@@ -69,6 +69,8 @@ logging:
     org.springframework.cloud.stream: DEBUG
     io.r2dbc.postgresql.QUERY: DEBUG
     io.r2dbc.postgresql.PARAM: DEBUG
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 
 management:
   endpoints:
@@ -81,9 +83,15 @@ management:
   tracing:
     sampling:
       probability: 1.0
+    brave:
+      span-joining-supported: false
   zipkin:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
+    sender:
+      type: web
+    service:
+      name: ${spring.application.name}
   metrics:
     export:
       prometheus:
@@ -91,6 +99,13 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+  observations:
+    http:
+      server:
+        requests:
+          name: http.server.requests
+    annotations:
+      enabled: true
 
 info:
   app:
