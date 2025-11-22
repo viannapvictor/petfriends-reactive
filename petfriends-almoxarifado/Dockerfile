@@ -1,12 +1,18 @@
 FROM maven:3.9.5-eclipse-temurin-17-alpine AS build
-WORKDIR /app
+WORKDIR /workspace
 
-COPY pom.xml ../pom.xml
+# Copia o POM pai para a raiz do workspace
+COPY pom.xml ./pom.xml
 
-COPY petfriends-almoxarifado/pom.xml ./pom.xml
-COPY petfriends-almoxarifado/src ./src
+# Copia ambos os módulos (POM pai declara ambos, Maven precisa validá-los)
+COPY petfriends-almoxarifado/pom.xml ./petfriends-almoxarifado/pom.xml
+COPY petfriends-almoxarifado/src ./petfriends-almoxarifado/src
 
-RUN mvn clean package -DskipTests -f ./pom.xml
+COPY petfriends-transporte/pom.xml ./petfriends-transporte/pom.xml
+COPY petfriends-transporte/src ./petfriends-transporte/src
+
+# Build apenas do módulo almoxarifado
+RUN mvn clean package -DskipTests -pl petfriends-almoxarifado -am
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
@@ -14,7 +20,7 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /workspace/petfriends-almoxarifado/target/*.jar app.jar
 
 EXPOSE 8082
 

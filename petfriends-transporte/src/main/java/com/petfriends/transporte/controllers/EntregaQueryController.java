@@ -45,4 +45,9 @@ public class EntregaQueryController {
     public Flux<EntregaView> listarPorStatus(@PathVariable String status) {
         return service.listarPorStatus(status);
     }
+
+    @GetMapping
+    public Flux<EntregaView> listarTodas() {
+        return service.listarTodas();
+    }
 }

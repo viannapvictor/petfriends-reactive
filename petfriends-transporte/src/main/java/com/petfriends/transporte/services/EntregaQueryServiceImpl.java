@@ -49,4 +49,13 @@ public class EntregaQueryServiceImpl implements EntregaQueryService {
             .doOnComplete(() -> log.debug("Entregas listadas por status: {}", status))
             .doOnError(error -> log.error("Erro ao listar entregas por status: {}", status, error));
     }
+
+    @Override
+    public Flux<EntregaView> listarTodas() {
+        return viewRepository.findAll()
+            .doOnNext(entrega -> log.debug("Listando entrega: id={}, pedidoId={}, status={}",
+                entrega.getId(), entrega.getPedidoId(), entrega.getStatus()))
+            .doOnComplete(() -> log.debug("Listagem de todas as entregas concluída"))
+            .doOnError(error -> log.error("Erro ao listar todas as entregas", error));
+    }
 }

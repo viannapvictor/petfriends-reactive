@@ -1,12 +1,18 @@
 FROM maven:3.9.5-eclipse-temurin-17-alpine AS build
-WORKDIR /app
+WORKDIR /workspace
 
-COPY pom.xml ../pom.xml
+# Copia o POM pai para a raiz do workspace
+COPY pom.xml ./pom.xml
 
-COPY petfriends-transporte/pom.xml ./pom.xml
-COPY petfriends-transporte/src ./src
+# Copia ambos os módulos (POM pai declara ambos, Maven precisa validá-los)
+COPY petfriends-almoxarifado/pom.xml ./petfriends-almoxarifado/pom.xml
+COPY petfriends-almoxarifado/src ./petfriends-almoxarifado/src
 
-RUN mvn clean package -DskipTests -f ./pom.xml
+COPY petfriends-transporte/pom.xml ./petfriends-transporte/pom.xml
+COPY petfriends-transporte/src ./petfriends-transporte/src
+
+# Build apenas do módulo transporte
+RUN mvn clean package -DskipTests -pl petfriends-transporte -am
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
@@ -14,7 +20,7 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /workspace/petfriends-transporte/target/*.jar app.jar
 
 EXPOSE 8083
 
@@ -23,7 +29,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
 
 ENTRYPOINT ["java", \
   "-XX:+UseContainerSupport", \
-  "-XX:+MaxRAMPercentage=75.0", \
+  "-XX:MaxRAMPercentage=75.0", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-jar", "app.jar"]
 

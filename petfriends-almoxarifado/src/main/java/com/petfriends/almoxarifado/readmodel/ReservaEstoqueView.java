@@ -1,5 +1,6 @@
 package com.petfriends.almoxarifado.readmodel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,8 +22,9 @@ public class ReservaEstoqueView implements Persistable<String> {
     
     @Id
     private String id;
-    
+
     @Transient
+    @JsonIgnore
     @Builder.Default
     private boolean isNew = true;
     
