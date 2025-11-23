@@ -72,6 +72,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
     ports:
       - "8082:8082"
     environment:
@@ -87,6 +89,8 @@ services:
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_COM_PETFRIENDS_ALMOXARIFADO: DEBUG
       LOGGING_PATTERN_LEVEL: "%5p [%X{spring.application.name},%X{traceId},%X{spanId}]"
+      LOGSTASH_HOST: logstash
+      LOGSTASH_PORT: 5000
     networks:
       - petfriends-network
     restart: unless-stopped
@@ -109,6 +113,8 @@ services:
         condition: service_healthy
       almoxarifado:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
     ports:
       - "8083:8083"
     environment:
@@ -125,6 +131,8 @@ services:
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_COM_PETFRIENDS_TRANSPORTE: DEBUG
       LOGGING_PATTERN_LEVEL: "%5p [%X{spring.application.name},%X{traceId},%X{spanId}]"
+      LOGSTASH_HOST: logstash
+      LOGSTASH_PORT: 5000
     networks:
       - petfriends-network
     restart: unless-stopped
@@ -144,6 +152,72 @@ services:
       - petfriends-network
     restart: unless-stopped
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: petfriends-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - petfriends-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: petfriends-logstash
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    networks:
+      - petfriends-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9600/_node/stats || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: petfriends-kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    networks:
+      - petfriends-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
 
 networks:
   petfriends-network:
@@ -151,5 +225,7 @@ networks:
 
 volumes:
   postgres-data:
+    driver: local
+  elasticsearch-data:
     driver: local
 
