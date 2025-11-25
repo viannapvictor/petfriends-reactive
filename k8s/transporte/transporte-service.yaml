@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: transporte-service
+  namespace: petfriends
+spec:
+  selector:
+    app: transporte
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8083
+    protocol: TCP
+    name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transporte-internal
+  namespace: petfriends
+spec:
+  selector:
+    app: transporte
+  type: ClusterIP
+  ports:
+  - port: 8083
+    targetPort: 8083
+    protocol: TCP
+    name: http
+

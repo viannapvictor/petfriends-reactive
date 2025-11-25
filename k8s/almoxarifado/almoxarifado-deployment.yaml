@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: almoxarifado
+  namespace: petfriends
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: almoxarifado
+  template:
+    metadata:
+      labels:
+        app: almoxarifado
+    spec:
+      containers:
+      - name: almoxarifado
+        image: viannavictor/petfriends-almoxarifado:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+          name: http
+        env:
+        - name: SPRING_R2DBC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: SPRING_R2DBC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: SPRING_FLYWAY_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: SPRING_FLYWAY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        envFrom:
+        - configMapRef:
+            name: almoxarifado-config
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
