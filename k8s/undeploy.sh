@@ -1,57 +1,113 @@
 #!/bin/bash
 
-set -e
-
 echo "======================================"
 echo "PetFriends - Undeploy from Kubernetes"
 echo "======================================"
+echo ""
 
-echo "Deleting microservices..."
-kubectl delete -f transporte/transporte-hpa.yaml --ignore-not-found=true
-kubectl delete -f transporte/transporte-service.yaml --ignore-not-found=true
-kubectl delete -f transporte/transporte-deployment.yaml --ignore-not-found=true
-kubectl delete -f transporte/transporte-configmap.yaml --ignore-not-found=true
+# Verificar se o namespace existe
+if ! kubectl get namespace petfriends &> /dev/null; then
+    echo "Namespace 'petfriends' nao existe. Nada a fazer."
+    exit 0
+fi
 
-kubectl delete -f almoxarifado/almoxarifado-hpa.yaml --ignore-not-found=true
-kubectl delete -f almoxarifado/almoxarifado-service.yaml --ignore-not-found=true
-kubectl delete -f almoxarifado/almoxarifado-deployment.yaml --ignore-not-found=true
-kubectl delete -f almoxarifado/almoxarifado-configmap.yaml --ignore-not-found=true
+echo "Deletando recursos do namespace petfriends..."
+echo ""
 
-echo "Deleting Kibana..."
-kubectl delete -f kibana/kibana-service.yaml --ignore-not-found=true
-kubectl delete -f kibana/kibana-deployment.yaml --ignore-not-found=true
+# Deletar recursos na ordem reversa do deploy para evitar dependências
 
-echo "Deleting Logstash..."
-kubectl delete -f logstash/logstash-service.yaml --ignore-not-found=true
-kubectl delete -f logstash/logstash-deployment.yaml --ignore-not-found=true
-kubectl delete -f logstash/logstash-configmap.yaml --ignore-not-found=true
+echo "1. Deletando HPAs..."
+kubectl delete hpa --all -n petfriends --ignore-not-found=true --timeout=30s
 
-echo "Deleting Elasticsearch..."
-kubectl delete -f elasticsearch/elasticsearch-service.yaml --ignore-not-found=true
-kubectl delete -f elasticsearch/elasticsearch-statefulset.yaml --ignore-not-found=true
+echo "2. Deletando Deployments dos microsserviços..."
+kubectl delete deployment almoxarifado transporte -n petfriends --ignore-not-found=true --timeout=30s
 
-echo "Deleting Zipkin..."
-kubectl delete -f zipkin/zipkin-service.yaml --ignore-not-found=true
-kubectl delete -f zipkin/zipkin-deployment.yaml --ignore-not-found=true
+echo "3. Deletando Services dos microsserviços..."
+kubectl delete service almoxarifado-service almoxarifado-internal -n petfriends --ignore-not-found=true
+kubectl delete service transporte-service transporte-internal -n petfriends --ignore-not-found=true
 
-echo "Deleting Kafka..."
-kubectl delete -f kafka/kafka-service.yaml --ignore-not-found=true
-kubectl delete -f kafka/kafka-deployment.yaml --ignore-not-found=true
-kubectl delete -f kafka/zookeeper-service.yaml --ignore-not-found=true
-kubectl delete -f kafka/zookeeper-deployment.yaml --ignore-not-found=true
+echo "4. Deletando ConfigMaps dos microsserviços..."
+kubectl delete configmap almoxarifado-config transporte-config -n petfriends --ignore-not-found=true
 
-echo "Deleting PostgreSQL..."
-kubectl delete -f postgres/postgres-service.yaml --ignore-not-found=true
-kubectl delete -f postgres/postgres-statefulset.yaml --ignore-not-found=true
-kubectl delete -f postgres/postgres-pvc.yaml --ignore-not-found=true
-kubectl delete -f postgres/postgres-configmap.yaml --ignore-not-found=true
-kubectl delete -f postgres/postgres-secret.yaml --ignore-not-found=true
+echo "5. Deletando Deployments de observabilidade..."
+kubectl delete deployment kibana logstash zipkin -n petfriends --ignore-not-found=true --timeout=30s
 
-echo "Deleting namespace..."
-kubectl delete namespace petfriends --ignore-not-found=true
+echo "6. Deletando Services de observabilidade..."
+kubectl delete service kibana-service logstash-service zipkin-service -n petfriends --ignore-not-found=true
+
+echo "7. Deletando ConfigMaps de observabilidade..."
+kubectl delete configmap logstash-config -n petfriends --ignore-not-found=true
+
+echo "8. Deletando StatefulSets..."
+kubectl delete statefulset elasticsearch postgres -n petfriends --ignore-not-found=true --timeout=30s
+
+echo "9. Deletando Services de infraestrutura..."
+kubectl delete service elasticsearch-service postgres-service -n petfriends --ignore-not-found=true
+
+echo "10. Deletando Kafka e Zookeeper..."
+kubectl delete deployment kafka zookeeper -n petfriends --ignore-not-found=true --timeout=30s
+kubectl delete service kafka-service zookeeper-service -n petfriends --ignore-not-found=true
+
+echo "11. Deletando PVCs..."
+kubectl delete pvc --all -n petfriends --ignore-not-found=true --timeout=30s
+
+echo "12. Deletando ConfigMaps e Secrets restantes..."
+kubectl delete configmap postgres-config -n petfriends --ignore-not-found=true
+kubectl delete secret postgres-secret -n petfriends --ignore-not-found=true
+
+echo ""
+echo "13. Deletando namespace..."
+kubectl delete namespace petfriends --timeout=60s &
+
+# PID do comando delete
+DELETE_PID=$!
+
+# Aguardar com feedback visual
+echo "Aguardando delecao (pode levar ate 90 segundos)..."
+for i in {1..45}; do
+    if ! kubectl get namespace petfriends &> /dev/null; then
+        echo ""
+        echo "Namespace deletado com sucesso!"
+        wait $DELETE_PID 2>/dev/null
+        break
+    fi
+    echo -n "."
+    sleep 2
+    
+    # Se já passou dos 90 segundos, forçar
+    if [ $i -eq 45 ]; then
+        echo ""
+        echo ""
+        echo "Tempo esgotado. Forcando delecao..."
+        kill $DELETE_PID 2>/dev/null || true
+        wait $DELETE_PID 2>/dev/null || true
+        
+        # Tentar forçar deleção
+        kubectl delete namespace petfriends --force --grace-period=0 2>/dev/null || true
+        sleep 5
+    fi
+done
+
+echo ""
+
+# Verificar resultado final
+if kubectl get namespace petfriends &> /dev/null; then
+    echo ""
+    echo "AVISO: Namespace ainda existe. Pode estar com recursos presos."
+    echo ""
+    echo "Recursos remanescentes:"
+    kubectl get all -n petfriends 2>/dev/null || echo "  (nenhum recurso visivel)"
+    echo ""
+    echo "Para forcar remocao completa, execute:"
+    echo "  kubectl delete namespace petfriends --force --grace-period=0"
+    echo "  kubectl patch namespace petfriends -p '{\"metadata\":{\"finalizers\":[]}}' --type=merge"
+    echo ""
+    exit 1
+fi
 
 echo ""
 echo "======================================"
 echo "Undeploy completed successfully!"
 echo "======================================"
+echo ""
 
