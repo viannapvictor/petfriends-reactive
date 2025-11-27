@@ -328,4 +328,30 @@ class EntregaProjectionTest {
 
         verify(commandService).agendarEntrega(anyString(), anyString(), any(), anyString());
     }
+
+    @Test
+    @DisplayName("Deve ignorar ItensSeparados quando enderecoEntrega é null")
+    void deveIgnorarItensSeparadosQuandoEnderecoEntregaNull() throws Exception {
+        String jsonMessage = "{\"id\":\"RES-001\",\"pedidoId\":\"PED-001\",\"enderecoEntrega\":null,\"operadorId\":\"OP-001\",\"dataSeparacao\":\"2025-12-01T10:00:00\"}";
+
+        Function<Flux<String>, Mono<Void>> handler = projection.almoxarifadoEventsIn();
+
+        StepVerifier.create(handler.apply(Flux.just(jsonMessage)))
+                .verifyComplete();
+
+        verifyNoInteractions(commandService);
+    }
+
+    @Test
+    @DisplayName("Deve ignorar mensagem JSON inválida")
+    void deveIgnorarMensagemJsonInvalida() throws Exception {
+        String jsonInvalido = "{invalid json";
+
+        Function<Flux<String>, Mono<Void>> handler = projection.almoxarifadoEventsIn();
+
+        StepVerifier.create(handler.apply(Flux.just(jsonInvalido)))
+                .verifyComplete();
+
+        verifyNoInteractions(commandService);
+    }
 }

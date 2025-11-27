@@ -351,4 +351,51 @@ class EntregaTest {
 
         assertEquals(StatusEntrega.EXTRAVIADA.toString(), entrega.getStatus());
     }
+
+    @Test
+    @DisplayName("Deve agendar entrega com complemento null no endereço")
+    void deveAgendarEntregaComComplementoNullNoEndereco() {
+        LocalDate dataPrevisao = LocalDate.of(2025, 12, 25);
+        AgendarEntregaCommand.EnderecoDTO enderecoSemComplemento = new AgendarEntregaCommand.EnderecoDTO(
+                "Rua C", "300", null, "Vila", "São Paulo", "SP", "02000-000"
+        );
+        AgendarEntregaCommand comando = new AgendarEntregaCommand(
+                "ENT-003", "PED-003", "RES-003", enderecoSemComplemento, dataPrevisao
+        );
+
+        Entrega novaEntrega = new Entrega("ENT-003");
+        BaseEvent<?> evento = novaEntrega.agendarEntrega(comando);
+
+        assertTrue(evento instanceof EntregaAgendada);
+        EntregaAgendada entregaAgendada = (EntregaAgendada) evento;
+        assertNotNull(entregaAgendada.enderecoCompleto);
+        assertTrue(entregaAgendada.enderecoCompleto.contains("Rua C"));
+        assertFalse(entregaAgendada.enderecoCompleto.contains("null"));
+    }
+
+    @Test
+    @DisplayName("Deve formatar endereço corretamente com todos os campos")
+    void deveFormatarEnderecoCorretamenteComTodosOsCampos() {
+        LocalDate dataPrevisao = LocalDate.of(2025, 12, 30);
+        AgendarEntregaCommand.EnderecoDTO enderecoComTodosCampos = new AgendarEntregaCommand.EnderecoDTO(
+                "Avenida Paulista", "1000", "Andar 10", "Bela Vista", "São Paulo", "SP", "01310-100"
+        );
+        AgendarEntregaCommand comando = new AgendarEntregaCommand(
+                "ENT-004", "PED-004", "RES-004", enderecoComTodosCampos, dataPrevisao
+        );
+
+        Entrega novaEntrega = new Entrega("ENT-004");
+        BaseEvent<?> evento = novaEntrega.agendarEntrega(comando);
+
+        EntregaAgendada entregaAgendada = (EntregaAgendada) evento;
+        String endereco = entregaAgendada.enderecoCompleto;
+        
+        assertTrue(endereco.contains("Avenida Paulista"));
+        assertTrue(endereco.contains("1000"));
+        assertTrue(endereco.contains("Andar 10"));
+        assertTrue(endereco.contains("Bela Vista"));
+        assertTrue(endereco.contains("São Paulo"));
+        assertTrue(endereco.contains("SP"));
+        assertTrue(endereco.contains("01310-100"));
+    }
 }

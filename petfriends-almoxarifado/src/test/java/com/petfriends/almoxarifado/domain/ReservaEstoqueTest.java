@@ -287,4 +287,53 @@ class ReservaEstoqueTest {
 
         assertEquals("OP-123", reserva.getOperadorId());
     }
+
+    @Test
+    @DisplayName("Deve retornar EstoqueInsuficiente quando quantidade é zero")
+    void deveRetornarEstoqueInsuficienteQuandoQuantidadeEZero() {
+        Endereco endereco = new Endereco("Rua Teste", "123", null, "Centro", "São Paulo", "SP", "01000-000");
+        List<ReservarEstoqueCommand.ItemReservaDTO> itens = Arrays.asList(
+                new ReservarEstoqueCommand.ItemReservaDTO("PROD-001", 0)
+        );
+        ReservarEstoqueCommand comando = new ReservarEstoqueCommand("RES-001", "PED-001", endereco, itens);
+        
+        ReservaEstoque novaReserva = new ReservaEstoque("RES-001");
+        BaseEvent<?> evento = novaReserva.reservarEstoque(comando);
+
+        assertTrue(evento instanceof EstoqueInsuficiente);
+    }
+
+    @Test
+    @DisplayName("Deve retornar EstoqueInsuficiente quando quantidade é negativa")
+    void deveRetornarEstoqueInsuficienteQuandoQuantidadeENegativa() {
+        Endereco endereco = new Endereco("Rua Teste", "123", null, "Centro", "São Paulo", "SP", "01000-000");
+        List<ReservarEstoqueCommand.ItemReservaDTO> itens = Arrays.asList(
+                new ReservarEstoqueCommand.ItemReservaDTO("PROD-001", -5)
+        );
+        ReservarEstoqueCommand comando = new ReservarEstoqueCommand("RES-001", "PED-001", endereco, itens);
+        
+        ReservaEstoque novaReserva = new ReservaEstoque("RES-001");
+        BaseEvent<?> evento = novaReserva.reservarEstoque(comando);
+
+        assertTrue(evento instanceof EstoqueInsuficiente);
+    }
+
+    @Test
+    @DisplayName("Deve retornar EstoqueInsuficiente quando algum item tem quantidade inválida")
+    void deveRetornarEstoqueInsuficienteQuandoAlgumItemTemQuantidadeInvalida() {
+        Endereco endereco = new Endereco("Rua Teste", "123", null, "Centro", "São Paulo", "SP", "01000-000");
+        List<ReservarEstoqueCommand.ItemReservaDTO> itens = Arrays.asList(
+                new ReservarEstoqueCommand.ItemReservaDTO("PROD-001", 10),
+                new ReservarEstoqueCommand.ItemReservaDTO("PROD-002", 0),
+                new ReservarEstoqueCommand.ItemReservaDTO("PROD-003", 5)
+        );
+        ReservarEstoqueCommand comando = new ReservarEstoqueCommand("RES-001", "PED-001", endereco, itens);
+        
+        ReservaEstoque novaReserva = new ReservaEstoque("RES-001");
+        BaseEvent<?> evento = novaReserva.reservarEstoque(comando);
+
+        assertTrue(evento instanceof EstoqueInsuficiente);
+        EstoqueInsuficiente eventoInsuficiente = (EstoqueInsuficiente) evento;
+        assertEquals(3, eventoInsuficiente.produtosIndisponiveis.size());
+    }
 }
