@@ -162,4 +162,51 @@ class ReservaEstoqueQueryServiceImplTest {
 
         verify(viewRepository).findByPedidoId(null);
     }
+
+    @Test
+    @DisplayName("Deve buscar múltiplas reservas sequencialmente")
+    void deveBuscarMultiplasReservasSequencialmente() {
+        ReservaEstoqueView view1 = ReservaEstoqueView.builder().id("RES-001").build();
+        ReservaEstoqueView view2 = ReservaEstoqueView.builder().id("RES-002").build();
+
+        when(viewRepository.findById("RES-001")).thenReturn(Mono.just(view1));
+        when(viewRepository.findById("RES-002")).thenReturn(Mono.just(view2));
+
+        StepVerifier.create(service.obterPorId("RES-001"))
+                .expectNext(view1)
+                .verifyComplete();
+
+        StepVerifier.create(service.obterPorId("RES-002"))
+                .expectNext(view2)
+                .verifyComplete();
+
+        verify(viewRepository).findById("RES-001");
+        verify(viewRepository).findById("RES-002");
+    }
+
+    @Test
+    @DisplayName("Deve buscar reserva com todos os campos preenchidos")
+    void deveBuscarReservaComTodosCamposPreenchidos() {
+        ReservaEstoqueView view = ReservaEstoqueView.builder()
+                .id("RES-001")
+                .pedidoId("PED-001")
+                .status("SEPARADA")
+                .enderecoRua("Rua A")
+                .enderecoNumero("100")
+                .enderecoComplemento("Apto 10")
+                .enderecoBairro("Centro")
+                .enderecoCidade("São Paulo")
+                .enderecoEstado("SP")
+                .enderecoCep("01000-000")
+                .operadorId("OP-001")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(viewRepository.findById("RES-001")).thenReturn(Mono.just(view));
+
+        StepVerifier.create(service.obterPorId("RES-001"))
+                .expectNext(view)
+                .verifyComplete();
+    }
 }

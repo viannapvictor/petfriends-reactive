@@ -338,4 +338,44 @@ class EntregaQueryServiceImplTest {
 
         verify(viewRepository).findAll();
     }
+
+    @Test
+    @DisplayName("Deve buscar entrega com todos os campos preenchidos")
+    void deveBuscarEntregaComTodosCamposPreenchidos() {
+        EntregaView view = EntregaView.builder()
+                .id("ENT-001")
+                .pedidoId("PED-001")
+                .reservaId("RES-001")
+                .status("CONCLUIDA")
+                .enderecoCompleto("Rua A, 100 - Centro, SP/SP")
+                .dataPrevisaoEntrega("2025-12-31")
+                .motoristaId("MOT-001")
+                .veiculoId("VEI-001")
+                .recebedor("João Silva")
+                .dataHoraRecebimento("2025-12-25T10:00:00")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(viewRepository.findById("ENT-001")).thenReturn(Mono.just(view));
+
+        StepVerifier.create(service.obterPorId("ENT-001"))
+                .expectNext(view)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Deve processar grande volume de entregas")
+    void deveProcessarGrandeVolumeDeEntregas() {
+        EntregaView[] views = new EntregaView[50];
+        for (int i = 0; i < 50; i++) {
+            views[i] = EntregaView.builder().id("ENT-" + i).motoristaId("MOT-001").build();
+        }
+
+        when(viewRepository.findByMotoristaId("MOT-001")).thenReturn(Flux.just(views));
+
+        StepVerifier.create(service.listarPorMotorista("MOT-001"))
+                .expectNextCount(50)
+                .verifyComplete();
+    }
 }
