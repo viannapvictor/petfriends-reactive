@@ -336,4 +336,70 @@ class ReservaEstoqueTest {
         EstoqueInsuficiente eventoInsuficiente = (EstoqueInsuficiente) evento;
         assertEquals(3, eventoInsuficiente.produtosIndisponiveis.size());
     }
+
+    @Test
+    @DisplayName("Deve testar getters e setters de ItemReserva")
+    void deveTestarGettersESettersDeItemReserva() {
+        ReservaEstoque.ItemReserva item = new ReservaEstoque.ItemReserva();
+        item.setProdutoId("PROD-100");
+        item.setQuantidade(50);
+
+        assertEquals("PROD-100", item.getProdutoId());
+        assertEquals(50, item.getQuantidade());
+    }
+
+    @Test
+    @DisplayName("Deve ignorar evento desconhecido no apply")
+    void deveIgnorarEventoDesconhecidoNoApply() {
+        BaseEvent<?> eventoDesconhecido = new BaseEvent<>("unknown-id") {
+            @Override
+            public String getAggregateId() {
+                return "unknown-id";
+            }
+        };
+
+        assertDoesNotThrow(() -> reserva.apply(eventoDesconhecido));
+    }
+
+    @Test
+    @DisplayName("Deve aplicar múltiplos eventos em sequência")
+    void deveAplicarMultiplosEventosEmSequencia() {
+        List<EstoqueReservado.ItemReservado> itens = Arrays.asList(
+                new EstoqueReservado.ItemReservado("PROD-001", 10)
+        );
+        
+        EstoqueReservado evento1 = new EstoqueReservado("RES-001", "PED-001", enderecoTeste, itens);
+        ReservaConfirmada evento2 = new ReservaConfirmada("RES-001", "PED-001");
+        ItensSeparados evento3 = new ItensSeparados("RES-001", "PED-001", enderecoTeste, "OP-001");
+
+        reserva.apply(evento1);
+        reserva.apply(evento2);
+        reserva.apply(evento3);
+
+        assertEquals(StatusReserva.SEPARADA.toString(), reserva.getStatus());
+        assertEquals("OP-001", reserva.getOperadorId());
+    }
+
+    @Test
+    @DisplayName("Deve testar todos os getters e setters do agregado")
+    void deveTestarTodosGettersESettersDoAgregado() {
+        ReservaEstoque novaReserva = new ReservaEstoque();
+        novaReserva.setId("RES-999");
+        novaReserva.setPedidoId("PED-999");
+        novaReserva.setEnderecoEntrega(enderecoTeste);
+        novaReserva.setStatus("TESTE");
+        novaReserva.setOperadorId("OP-999");
+        
+        List<ReservaEstoque.ItemReserva> novosItens = Arrays.asList(
+                new ReservaEstoque.ItemReserva("PROD-999", 99)
+        );
+        novaReserva.setItens(novosItens);
+
+        assertEquals("RES-999", novaReserva.getId());
+        assertEquals("PED-999", novaReserva.getPedidoId());
+        assertEquals(enderecoTeste, novaReserva.getEnderecoEntrega());
+        assertEquals("TESTE", novaReserva.getStatus());
+        assertEquals("OP-999", novaReserva.getOperadorId());
+        assertEquals(1, novaReserva.getItens().size());
+    }
 }
