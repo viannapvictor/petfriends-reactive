@@ -165,5 +165,81 @@ class CommandsTest {
         assertNull(command.localUltimoRegistro);
         assertEquals("Extraviado", command.motivo);
     }
+
+    @Test
+    @DisplayName("Deve verificar campos finais do AgendarEntregaCommand")
+    void deveVerificarCamposFinaisDoAgendarEntregaCommand() {
+        AgendarEntregaCommand.EnderecoDTO endereco = new AgendarEntregaCommand.EnderecoDTO(
+                "Rua A", "100", null, "Centro", "São Paulo", "SP", "01000-000"
+        );
+        LocalDate dataPrevisao = LocalDate.of(2025, 12, 25);
+
+        AgendarEntregaCommand command = new AgendarEntregaCommand(
+                "ENT-001", "PED-001", "RES-001", endereco, dataPrevisao
+        );
+
+        assertNotNull(command.pedidoId);
+        assertNotNull(command.reservaId);
+        assertNotNull(command.endereco);
+        assertNotNull(command.dataPrevisaoEntrega);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos finais do IniciarTransporteCommand")
+    void deveVerificarCamposFinaisDoIniciarTransporteCommand() {
+        IniciarTransporteCommand command = new IniciarTransporteCommand("ENT-001", "MOT-001", "VEI-001");
+
+        assertNotNull(command.motoristaId);
+        assertNotNull(command.veiculoId);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos finais do ConcluirEntregaCommand")
+    void deveVerificarCamposFinaisDoConcluirEntregaCommand() {
+        LocalDateTime dataRecebimento = LocalDateTime.now();
+        ConcluirEntregaCommand command = new ConcluirEntregaCommand(
+                "ENT-001", "João Silva", dataRecebimento, "OK"
+        );
+
+        assertNotNull(command.recebedor);
+        assertNotNull(command.dataRecebimento);
+        assertNotNull(command.observacoes);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos finais do DevolverEntregaCommand")
+    void deveVerificarCamposFinaisDoDevolverEntregaCommand() {
+        LocalDateTime dataDevolucao = LocalDateTime.now();
+        DevolverEntregaCommand command = new DevolverEntregaCommand(
+                "ENT-001", "Cliente ausente", dataDevolucao, "MOT-001"
+        );
+
+        assertNotNull(command.motivo);
+        assertNotNull(command.dataDevolucao);
+        assertNotNull(command.responsavel);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos finais do MarcarEntregaExtraviadaCommand")
+    void deveVerificarCamposFinaisDoMarcarEntregaExtraviadaCommand() {
+        LocalDateTime dataExtravio = LocalDateTime.now();
+        MarcarEntregaExtraviadaCommand command = new MarcarEntregaExtraviadaCommand(
+                "ENT-001", "Perdido", dataExtravio, "Centro"
+        );
+
+        assertNotNull(command.motivo);
+        assertNotNull(command.dataExtravio);
+        assertNotNull(command.localUltimoRegistro);
+    }
+
+    @Test
+    @DisplayName("Deve criar EnderecoDTO com complemento vazio")
+    void deveCriarEnderecoDTOComComplementoVazio() {
+        AgendarEntregaCommand.EnderecoDTO endereco = new AgendarEntregaCommand.EnderecoDTO(
+                "Rua B", "200", "", "Jardim", "Campinas", "SP", "13000-000"
+        );
+
+        assertEquals("", endereco.complemento);
+    }
 }
 
