@@ -203,5 +203,73 @@ class EventsTest {
         assertNotNull(evento.dataSeparacao);
         assertTrue(evento.dataSeparacao.isBefore(LocalDateTime.now().plusSeconds(1)));
     }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos do EstoqueReservado")
+    void deveVerificarCamposPublicosDoEstoqueReservado() {
+        Endereco endereco = new Endereco("Rua A", "1", null, "Centro", "SP", "SP", "01000-000");
+        List<EstoqueReservado.ItemReservado> itens = Arrays.asList(
+                new EstoqueReservado.ItemReservado("PROD-001", 2)
+        );
+
+        EstoqueReservado evento = new EstoqueReservado("RES-001", "PED-001", endereco, itens);
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.enderecoEntrega);
+        assertNotNull(evento.itens);
+        assertNotNull(evento.dataReserva);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos do EstoqueInsuficiente")
+    void deveVerificarCamposPublicosDoEstoqueInsuficiente() {
+        List<String> produtosIndisponiveis = Arrays.asList("PROD-001");
+
+        EstoqueInsuficiente evento = new EstoqueInsuficiente(
+                "RES-001", "PED-001", produtosIndisponiveis, "Sem estoque"
+        );
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.produtosIndisponiveis);
+        assertNotNull(evento.mensagem);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos da ReservaConfirmada")
+    void deveVerificarCamposPublicosDaReservaConfirmada() {
+        ReservaConfirmada evento = new ReservaConfirmada("RES-001", "PED-001");
+
+        assertNotNull(evento.pedidoId);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos da ReservaCancelada")
+    void deveVerificarCamposPublicosDaReservaCancelada() {
+        ReservaCancelada evento = new ReservaCancelada("RES-001", "PED-001", "Motivo");
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.motivo);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos do ItensSeparados")
+    void deveVerificarCamposPublicosDoItensSeparados() {
+        Endereco endereco = new Endereco("Rua A", "1", null, "Centro", "SP", "SP", "01000-000");
+        ItensSeparados evento = new ItensSeparados("RES-001", "PED-001", endereco, "OP-001");
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.enderecoEntrega);
+        assertNotNull(evento.operadorId);
+        assertNotNull(evento.dataSeparacao);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos do ItemReservado")
+    void deveVerificarCamposPublicosDoItemReservado() {
+        EstoqueReservado.ItemReservado item = new EstoqueReservado.ItemReservado("PROD-001", 10);
+
+        assertNotNull(item.produtoId);
+        assertTrue(item.quantidade > 0);
+    }
 }
 

@@ -112,5 +112,49 @@ class CommandsTest {
         assertEquals("RES-001", command.id);
         assertNull(command.operadorId);
     }
+
+    @Test
+    @DisplayName("Deve verificar campo final pedidoId em ReservarEstoqueCommand")
+    void deveVerificarCampoFinalPedidoIdEmReservarEstoqueCommand() {
+        Endereco endereco = new Endereco("Rua A", "1", null, "Centro", "SP", "SP", "01000-000");
+        List<ReservarEstoqueCommand.ItemReservaDTO> itens = Arrays.asList(
+                new ReservarEstoqueCommand.ItemReservaDTO("PROD-001", 5)
+        );
+
+        ReservarEstoqueCommand command = new ReservarEstoqueCommand("RES-001", "PED-001", endereco, itens);
+
+        assertNotNull(command.pedidoId);
+        assertNotNull(command.enderecoEntrega);
+        assertNotNull(command.itens);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campo final motivo em CancelarReservaCommand")
+    void deveVerificarCampoFinalMotivoEmCancelarReservaCommand() {
+        CancelarReservaCommand command = new CancelarReservaCommand("RES-001", "Cliente cancelou");
+
+        assertNotNull(command.motivo);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campo final operadorId em SepararItensCommand")
+    void deveVerificarCampoFinalOperadorIdEmSepararItensCommand() {
+        SepararItensCommand command = new SepararItensCommand("RES-001", "OP-001");
+
+        assertNotNull(command.operadorId);
+    }
+
+    @Test
+    @DisplayName("Deve criar ReservarEstoqueCommand com endereço com complemento")
+    void deveCriarReservarEstoqueCommandComEnderecoComComplemento() {
+        Endereco endereco = new Endereco("Rua A", "1", "Apto 10", "Centro", "SP", "SP", "01000-000");
+        List<ReservarEstoqueCommand.ItemReservaDTO> itens = Arrays.asList(
+                new ReservarEstoqueCommand.ItemReservaDTO("PROD-001", 5)
+        );
+
+        ReservarEstoqueCommand command = new ReservarEstoqueCommand("RES-001", "PED-001", endereco, itens);
+
+        assertEquals("Apto 10", command.enderecoEntrega.getComplemento());
+    }
 }
 

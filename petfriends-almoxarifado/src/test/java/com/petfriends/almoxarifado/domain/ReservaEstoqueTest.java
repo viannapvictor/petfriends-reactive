@@ -277,4 +277,14 @@ class ReservaEstoqueTest {
         assertEquals("PROD-001", item.getProdutoId());
         assertEquals(10, item.getQuantidade());
     }
+
+    @Test
+    @DisplayName("Deve retornar operadorId após separar itens")
+    void deveRetornarOperadorIdAposSepararItens() {
+        ItensSeparados evento = new ItensSeparados("RES-001", "PED-001", enderecoTeste, "OP-123");
+
+        reserva.apply(evento);
+
+        assertEquals("OP-123", reserva.getOperadorId());
+    }
 }

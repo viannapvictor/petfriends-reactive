@@ -206,5 +206,71 @@ class EventsTest {
         assertEquals("VEI-ABC-1234", evento.veiculoId);
         assertEquals(dataSaida, evento.dataHoraSaida);
     }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos da EntregaAgendada")
+    void deveVerificarCamposPublicosDaEntregaAgendada() {
+        LocalDate dataPrevisao = LocalDate.of(2025, 12, 25);
+        EntregaAgendada evento = new EntregaAgendada(
+                "ENT-001", "PED-001", "RES-001", "Rua A, 100", dataPrevisao
+        );
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.reservaId);
+        assertNotNull(evento.enderecoCompleto);
+        assertNotNull(evento.dataPrevisao);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos do TransporteIniciado")
+    void deveVerificarCamposPublicosDoTransporteIniciado() {
+        TransporteIniciado evento = new TransporteIniciado("ENT-001", "MOT-001", "VEI-001");
+
+        assertNotNull(evento.motoristaId);
+        assertNotNull(evento.veiculoId);
+        assertNotNull(evento.dataHoraSaida);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos da EntregaConcluida")
+    void deveVerificarCamposPublicosDaEntregaConcluida() {
+        LocalDateTime dataRecebimento = LocalDateTime.now();
+        EntregaConcluida evento = new EntregaConcluida(
+                "ENT-001", "PED-001", "João Silva", dataRecebimento, "OK"
+        );
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.recebedor);
+        assertNotNull(evento.dataHoraRecebimento);
+        assertNotNull(evento.observacoes);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos da EntregaDevolvida")
+    void deveVerificarCamposPublicosDaEntregaDevolvida() {
+        LocalDateTime dataDevolucao = LocalDateTime.now();
+        EntregaDevolvida evento = new EntregaDevolvida(
+                "ENT-001", "PED-001", "Cliente ausente", dataDevolucao, "MOT-001"
+        );
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.motivo);
+        assertNotNull(evento.dataDevolucao);
+        assertNotNull(evento.responsavel);
+    }
+
+    @Test
+    @DisplayName("Deve verificar campos públicos da EntregaExtraviada")
+    void deveVerificarCamposPublicosDaEntregaExtraviada() {
+        LocalDateTime dataExtravio = LocalDateTime.now();
+        EntregaExtraviada evento = new EntregaExtraviada(
+                "ENT-001", "PED-001", "Perdido", dataExtravio, "Centro"
+        );
+
+        assertNotNull(evento.pedidoId);
+        assertNotNull(evento.motivo);
+        assertNotNull(evento.dataExtravio);
+        assertNotNull(evento.localUltimoRegistro);
+    }
 }
 

@@ -275,4 +275,95 @@ class ReservaEstoqueCommandControllerTest {
 
         verify(service).confirmarReserva("RES-001");
     }
+
+    @Test
+    @DisplayName("Deve processar request com lista de itens vazia")
+    void deveProcessarRequestComListaDeItensVazia() {
+        String requestVazio = """
+            {
+                "pedidoId": "PED-001",
+                "endereco": {
+                    "rua": "Rua A",
+                    "numero": "100",
+                    "bairro": "Centro",
+                    "cidade": "São Paulo",
+                    "estado": "SP",
+                    "cep": "01000-000"
+                },
+                "itens": []
+            }
+            """;
+
+        when(service.reservarEstoque(anyString(), any(), anyList()))
+                .thenReturn(Mono.error(new IllegalArgumentException("Lista de itens não pode ser vazia")));
+
+        webTestClient.post()
+                .uri("/almoxarifado/reservas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestVazio)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Deve processar request com quantidade negativa")
+    void deveProcessarRequestComQuantidadeNegativa() {
+        String requestNegativo = """
+            {
+                "pedidoId": "PED-001",
+                "endereco": {
+                    "rua": "Rua A",
+                    "numero": "100",
+                    "bairro": "Centro",
+                    "cidade": "São Paulo",
+                    "estado": "SP",
+                    "cep": "01000-000"
+                },
+                "itens": [
+                    {"produtoId": "PROD-001", "quantidade": -5}
+                ]
+            }
+            """;
+
+        when(service.reservarEstoque(anyString(), any(), anyList()))
+                .thenReturn(Mono.error(new IllegalArgumentException("Quantidade deve ser positiva")));
+
+        webTestClient.post()
+                .uri("/almoxarifado/reservas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestNegativo)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Deve processar request com CEP inválido")
+    void deveProcessarRequestComCepInvalido() {
+        String requestCepInvalido = """
+            {
+                "pedidoId": "PED-001",
+                "endereco": {
+                    "rua": "Rua A",
+                    "numero": "100",
+                    "bairro": "Centro",
+                    "cidade": "São Paulo",
+                    "estado": "SP",
+                    "cep": "123"
+                },
+                "itens": [
+                    {"produtoId": "PROD-001", "quantidade": 5}
+                ]
+            }
+            """;
+
+        when(service.reservarEstoque(anyString(), any(), anyList()))
+                .thenReturn(Mono.error(new IllegalArgumentException("CEP inválido")));
+
+        webTestClient.post()
+                .uri("/almoxarifado/reservas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestCepInvalido)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 }
